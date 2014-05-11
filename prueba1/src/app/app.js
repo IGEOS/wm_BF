@@ -1,8 +1,8 @@
 /**
  * Add all your dependencies here.
  *
- * @require overrides/override-ext-ajax.js
  * @require widgets/Viewer.js
+ * @require plugins/ZoomToLayerExtent.js
  * @require plugins/LayerTree.js
  * @require plugins/OLSource.js
  * @require plugins/OSMSource.js
@@ -12,17 +12,19 @@
  * @require plugins/Zoom.js
  * @require plugins/AddLayers.js
  * @require plugins/RemoveLayer.js
- * @require plugins/ZoomToLayerExtent.js
  * @require RowExpander.js
+ * @require overrides/override-ext-ajax.js
  * @require plugins/WMSGetFeatureInfo.js
  * @require plugins/Legend.js
+ * @require plugins/GoogleGeocoder.js
+ * @require plugins/GoogleSource.js
  */
 
 var app = new gxp.Viewer({
     portalConfig: {
         layout: "border",
         region: "center",
-	proxy: "http://localhost:8080/geoserver",
+        proxy: "http://localhost:8080/geoserver",
         
         // by configuring items here, we don't need to configure portalItems
         // and save a wrapping container
@@ -34,25 +36,25 @@ var app = new gxp.Viewer({
             border: false,
             items: ["mymap"]
         }, {
-	    id: "westcontainer",
-	    xtype: "container",
-	    layout: "vbox",
-	    region: "west",
-	    width: 200,
-	    defaults: {
-        	width: "100%",
-	        layout: "fit"
-    	    },
-	    items: [{
-	        title: "Layers",
-        	id: "westpanel",
-	        border: false,
-	        flex: 1
-            }, {
-	        id: "legendpanel",
-	        height: 250
-            }]}
-        }],
+        id: "westcontainer",
+        xtype: "container",
+        layout: "vbox",
+        region: "west",
+        width: 200,
+        defaults: {
+            width: "100%",
+            layout: "fit"
+        },
+        items: [{
+            title: "Layers",
+            id: "westpanel",
+            border: false,
+            flex: 1
+        }, {
+            id: "legendpanel",
+            height: 250
+        }]
+    }],
         bbar: {id: "mybbar"}
     },
     
@@ -81,20 +83,30 @@ var app = new gxp.Viewer({
         ptype: "gxp_navigationhistory",
         actionTarget: "map.tbar"
     }, {
-	ptype: "gxp_zoomtolayerextent",
-	actionTarget: ["tree.tbar", "tree.contextMenu"]
+        ptype: "gxp_zoomtolayerextent",
+        actionTarget: ["tree.tbar", "tree.contextMenu"]
     }, {
-    ptype: "gxp_wmsgetfeatureinfo",
-    outputConfig: {
-        width: 400
-    },
-    actionTarget: {
-        target: "map.tbar",
-        index: 1
+        ptype: "gxp_wmsgetfeatureinfo",
+        outputConfig: {
+            width: 400
+        },
+        actionTarget: {
+            target: "map.tbar",
+            index: 1
+        }
     }, {
-     ptype: "gxp_legend",
-     outputTarget: "legendpanel"
-    }],
+        ptype: "gxp_legend",
+        outputTarget: "legendpanel"
+    }, {
+        ptype: "gxp_googlegeocoder",
+        outputTarget: "map.tbar",
+        outputConfig: {
+            emptyText: "Search for a location ..."
+        }
+    }, {
+        ptype: "gxp_googlesource"
+    }
+    ],
     
     // layer sources
     sources: {
@@ -122,7 +134,11 @@ var app = new gxp.Viewer({
         }, {
             source: "local",
             name: "usa:states",
-            selected: true
+            selected: true,
+        }, {
+            source: "google",
+            name: "ROADMAP",
+            group: "background"
         }],
         items: [{
             xtype: "gx_zoomslider",
